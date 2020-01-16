@@ -126,5 +126,7 @@ function getRandomColor() {
 
 function changeCursor(cursorType){
     document.body.style.cursor = cursorType;
+
 }
 
+a
