@@ -102,9 +102,9 @@ function stopAnimation() {
     isAnimationStarted = false;
     if (anmRef) {
         cancelAnimationFrame(anmRef);
+    } else {
+        drawHelpingLines();
     }
-    c.clearRect(0, 0, innerWidth, innerHeight);
-    drawHelpingLines();
 }
 
 function drawCurve() {
@@ -194,6 +194,7 @@ canvas.addEventListener('mousemove', function (event) {
         c.clearRect(0, 0, innerWidth, innerHeight);
         drawHelpingLines();
         if (isAnimationStarted) {
+            curvePoints = [];
             startAnimation();
         }
     }
