@@ -5,27 +5,46 @@ canvas.height = window.innerHeight - 30;
 
 let c = canvas.getContext('2d');
 let selectedPoint;
-
-let x = 200;
-let y = 200;
-let dx = 2;
-let dy = 2;
 let radius = 10;
 let pointId = 0;
 let lineWidth = 10;
 let t = 0;
 let dt = 0;
-let points = [
-    new Point(120, 222, '#808D9E', radius),
-    new Point(220, 122, '#808D9E', radius),
-    new Point(250, 222, '#808D9E', radius),
-];
+let points = [];
 let anmRef;
 let movingPoints = [];
-let connectionPoints = [];
 let curvePoints = [];
 let showCurve = false;
 let isAnimationStarted = false;
+
+function recursionMoveMovingPoints(pnts) {
+    let newPnts = [];
+
+    if(pnts.length === 1){
+        if (points.length !== 3) {
+            pnts[0].point.connectPoint(pnts[0].to, '#b000a0');
+        }
+        curvePoints.push( moveMovingPoint(pnts[0]));
+        return
+    }
+
+
+    for (let i = 0; i < pnts.length; i++){
+        if (pnts[i+1]){
+            pnts[i].point.connectPoint(pnts[i + 1].point, '#28B048');
+            pnts.forEach(function (p) {
+                moveMovingPoint(p);
+            });
+            newPnts.push({
+                from: pnts[i].point,
+                to: pnts[i + 1].point,
+                point: new Point(pnts[i].point.x, pnts[i].point.y, 'blue', 5),
+                linearEquation: findLinearEquation(pnts[i].point, pnts[i + 1].point)
+            });
+        }
+    }
+    return recursionMoveMovingPoints(newPnts);
+}
 
 function animateMovingPoints() {
     anmRef = requestAnimationFrame(animateMovingPoints);
@@ -33,19 +52,7 @@ function animateMovingPoints() {
     drawHelpingLines();
     t += dt;
 
-    movingPoints[0].point.connectPoint(movingPoints[1].point, '#28B048');
-    movingPoints.forEach(function (p) {
-        moveMovingPoint(p);
-    });
-
-    let points = moveMovingPoint({
-        from: movingPoints[0].point,
-        to: movingPoints[1].point,
-        point: new Point(movingPoints[0].point.x, movingPoints[0].point.y, 'blue', 5),
-        linearEquation: findLinearEquation(movingPoints[0].point, movingPoints[1].point)
-    });
-
-    curvePoints.push(points);
+    recursionMoveMovingPoints(movingPoints);
 
     if(showCurve){
         drawCurve();
@@ -79,22 +86,16 @@ function startAnimation() {
     isAnimationStarted = true;
     dt = parseFloat(document.querySelector('#deltaT').value);
 
-    let p1 = points[0];
-    let p2 = points[1];
-    let p3 = points[2];
-
-    movingPoints[0] = {
-        from: p1,
-        to: p2,
-        point: new Point(p1.x, p1.y, '#808D9E', 5),
-        linearEquation: findLinearEquation(p1, p2)
-    };
-    movingPoints[1] = {
-        from: p2,
-        to: p3,
-        point: new Point(p2.x, p2.y, '#808D9E', 5),
-        linearEquation: findLinearEquation(p2, p3)
-    };
+    for (let i = 0; i < points.length; i++){
+        if (points[i+1]){
+            movingPoints.push({
+                from: points[i],
+                to: points[i+1],
+                point: new Point(points[i].x, points[i].y, '#808D9E', 5),
+                linearEquation: findLinearEquation(points[i], points[i+1])
+            });
+        }
+    }
     animateMovingPoints();
 }
 
@@ -170,8 +171,11 @@ function drawPoints() {
 }
 
 function connectPoints() {
-    points[0].connectPoint(points[1]);
-    points[1].connectPoint(points[2]);
+    for (let i = 0; i < points.length; i++){
+        if (points[i+1]){
+            points[i].connectPoint(points[i+1])
+        }
+    }
 }
 
 // event Listeners
@@ -195,6 +199,7 @@ canvas.addEventListener('mousemove', function (event) {
         drawHelpingLines();
         if (isAnimationStarted) {
             curvePoints = [];
+            movingPoints = [];
             startAnimation();
         }
     }
@@ -217,4 +222,29 @@ function main() {
     drawHelpingLines();
 }
 
-main();
+// main();
+
+//init
+
+function initPoints(count) {
+    points = [];
+
+    let color = '#808D9E';
+    let startX = 100;
+    let startY = 100;
+    for (let i = 0; i < count; i++){
+        points.push(new Point(startX + 25*i, startY + 25*i, color, radius))
+    }
+}
+
+function setup(){
+    let points = parseInt(document.querySelector('#pointCount').value, 10);
+    if (points >= 3){
+        stopAnimation();
+        c.clearRect(0, 0, innerWidth, innerHeight);
+        initPoints(points);
+        drawHelpingLines();
+    }else {
+        alert("3 or more point required")
+    }
+}
