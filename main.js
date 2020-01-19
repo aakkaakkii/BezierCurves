@@ -27,25 +27,6 @@ let curvePoints = [];
 let showCurve = false;
 let isAnimationStarted = false;
 
-// animation
-/*function animate() {
-    let anm = requestAnimationFrame(animate);
-    c.clearRect(0, 0, innerWidth, innerHeight);
-    c.beginPath();
-    c.arc(x, y, radius, 0, Math.PI * 2, false);
-    c.strokeStyle = '#808D9E';
-    c.fillStyle = '#808D9E';
-    c.fill();
-    c.stroke();
-
-    x += dx;
-    y += dy;
-
-    if (x > innerWidth) {
-        cancelAnimationFrame(anm)
-    }
-}*/
-
 function animateMovingPoints() {
     anmRef = requestAnimationFrame(animateMovingPoints);
     c.clearRect(0, 0, innerWidth, innerHeight);
@@ -76,7 +57,14 @@ function moveMovingPoint(p) {
     p.point.y = p.point.x * p.linearEquation.k + p.linearEquation.b;
     p.point.drawPoint();
 
-    if (p.point.x >= p.to.x) {
+    if(p.from.x > p.to.x){
+        if ( p.point.x <= p.to.x) {
+            p.point.x = p.from.x;
+            p.point.y = p.from.y;
+            t = 0;
+            curvePoints = [];
+        }
+    } else if ( p.point.x >= p.to.x){
         p.point.x = p.from.x;
         p.point.y = p.from.y;
         t = 0;
@@ -205,7 +193,6 @@ canvas.addEventListener('mousemove', function (event) {
         selectedPoint.y = event.offsetY;
         c.clearRect(0, 0, innerWidth, innerHeight);
         drawHelpingLines();
-        console.log(isAnimationStarted)
         if (isAnimationStarted) {
             startAnimation();
         }
