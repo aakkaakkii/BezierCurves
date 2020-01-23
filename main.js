@@ -20,17 +20,17 @@ let isAnimationStarted = false;
 function recursionMoveMovingPoints(pnts) {
     let newPnts = [];
 
-    if(pnts.length === 1){
+    if (pnts.length === 1) {
         if (points.length !== 3) {
             pnts[0].point.connectPoint(pnts[0].to, '#b000a0');
         }
-        curvePoints.push( moveMovingPoint(pnts[0]));
+        curvePoints.push(moveMovingPoint(pnts[0]));
         return
     }
 
 
-    for (let i = 0; i < pnts.length; i++){
-        if (pnts[i+1]){
+    for (let i = 0; i < pnts.length; i++) {
+        if (pnts[i + 1]) {
             pnts[i].point.connectPoint(pnts[i + 1].point, '#28B048');
             pnts.forEach(function (p) {
                 moveMovingPoint(p);
@@ -51,10 +51,9 @@ function animateMovingPoints() {
     c.clearRect(0, 0, innerWidth, innerHeight);
     drawHelpingLines();
     t += dt;
-
     recursionMoveMovingPoints(movingPoints);
 
-    if(showCurve){
+    if (showCurve) {
         drawCurve();
     }
 }
@@ -64,38 +63,40 @@ function moveMovingPoint(p) {
     p.point.y = p.point.x * p.linearEquation.k + p.linearEquation.b;
     p.point.drawPoint();
 
-    if(p.from.x > p.to.x){
-        if ( p.point.x <= p.to.x) {
+    if (p.from.x > p.to.x) {
+        if (p.point.x <= p.to.x) {
             p.point.x = p.from.x;
             p.point.y = p.from.y;
             t = 0;
             curvePoints = [];
         }
-    } else if ( p.point.x >= p.to.x){
+    } else if (p.point.x >= p.to.x) {
         p.point.x = p.from.x;
         p.point.y = p.from.y;
         t = 0;
         curvePoints = [];
     }
 
-    return {x:p.point.x, y:p.point.y }
+    return {x: p.point.x, y: p.point.y}
 }
 
 function startAnimation() {
     stopAnimation();
+    movingPoints = [];
     isAnimationStarted = true;
     dt = parseFloat(document.querySelector('#deltaT').value);
 
-    for (let i = 0; i < points.length; i++){
-        if (points[i+1]){
+    for (let i = 0; i < points.length; i++) {
+        if (points[i + 1]) {
             movingPoints.push({
                 from: points[i],
-                to: points[i+1],
+                to: points[i + 1],
                 point: new Point(points[i].x, points[i].y, '#808D9E', 5),
-                linearEquation: findLinearEquation(points[i], points[i+1])
+                linearEquation: findLinearEquation(points[i], points[i + 1])
             });
         }
     }
+
     animateMovingPoints();
 }
 
@@ -110,10 +111,10 @@ function stopAnimation() {
 
 function drawCurve() {
     c.beginPath();
-    for (let i = 0; i < curvePoints.length ;i++){
-        if (curvePoints[i+1]){
+    for (let i = 0; i < curvePoints.length; i++) {
+        if (curvePoints[i + 1]) {
             c.moveTo(curvePoints[i].x, curvePoints[i].y);
-            c.lineTo(curvePoints[i+1].x, curvePoints[i+1].y);
+            c.lineTo(curvePoints[i + 1].x, curvePoints[i + 1].y);
         }
     }
     c.strokeStyle = 'red';
@@ -171,9 +172,9 @@ function drawPoints() {
 }
 
 function connectPoints() {
-    for (let i = 0; i < points.length; i++){
-        if (points[i+1]){
-            points[i].connectPoint(points[i+1])
+    for (let i = 0; i < points.length; i++) {
+        if (points[i + 1]) {
+            points[i].connectPoint(points[i + 1])
         }
     }
 }
@@ -232,19 +233,21 @@ function initPoints(count) {
     let color = '#808D9E';
     let startX = 100;
     let startY = 100;
-    for (let i = 0; i < count; i++){
-        points.push(new Point(startX + 25*i, startY + 25*i, color, radius))
+    for (let i = 0; i < count; i++) {
+        points.push(new Point(startX + 25 * i, startY + 25 * i, color, radius))
     }
 }
 
-function setup(){
+function setup() {
     let points = parseInt(document.querySelector('#pointCount').value, 10);
-    if (points >= 3){
+    if (points >= 3) {
         stopAnimation();
         c.clearRect(0, 0, innerWidth, innerHeight);
+        movingPoints = [];
+        curvePoints = [];
         initPoints(points);
         drawHelpingLines();
-    }else {
+    } else {
         alert("3 or more point required")
     }
 }
